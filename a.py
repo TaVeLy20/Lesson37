@@ -78,3 +78,48 @@ def firebullet(x, y):
 def iscollosion(enemyx, enemyy, bulletx, bullety):
     distance = math.sqrt((enemyx - bulletx) ** 2 + (enemyy - bullety) ** 2)
     return distance < colldist
+
+running  = True 
+while running:
+    screen.fill((0, 0, 0))
+    screen.blit(background, (0,0))
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                playerxchange = -5
+            if event.key == pygame.K_RIGHT:
+                playerxchange = 5
+            if event.key == pygame.K_SPACE and bulletstate == "ready":
+                bulletx = playerx
+                firebullet(bulletx, bullety)
+        if event.type == pygame.KEYUP and event.key in [pygame.K_LEFT, pygame.K_RIGHT]:
+            playerxchange = 0
+    
+    playerx += playerxchange
+    playerx = max(0, min(playerx, scrwid - 64))
+
+    for i in range(numofenemies):
+        if enemyy[i] > 340:
+            for j in range(numofenemies):
+                enemyy[j] = 2000
+            gameovertext()
+            break
+
+        enemyx[i] += enemyxchange[i]
+        if enemyx[i] <= 0 or enemyx[i] >= scrwid - 64:
+            enemyxchange[i] *= -1
+            enemyy[i] += enemyychange[i]
+
+        if iscollosion(enemyx[i], enemyy[i], bulletx, bullety):
+            bullety = playbegy
+            bulletstate = "ready"
+        elif bulletstate == "fire":
+            firebullet(bulletx, bullety)
+            bullety -= bulletychange
+        
+        player(playerx, playery)
+        showscore(textx, texty)
+        pygame.display.update()
